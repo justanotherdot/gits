@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+set -eu
+
+version() {
+  echo "git-rinse v0.1.0"
+  echo
+}
+
+usage() {
+  echo "usage: git rinse <branch>"
+  echo
+  echo "Delete a git branch locally and remotely"
+}
+
+current_branch() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+delete_branch() {
+  echo "Deleting branch $1 locally"
+  if test "$1" = "master" ; then
+    echo "git-rinse does not support deleting master"
+  else
+    git branch -D "$1"
+  fi
+}
+
+main() {
+  readonly branches=$(git branch | grep -v master)
+
+  git co master && git pull
+  for b in $branches; do
+    delete_branch "$b"
+  done
+}
+
+main "$@"

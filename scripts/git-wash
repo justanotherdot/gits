@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+set -eu
+
+version() {
+  echo "git-wash v0.1.0"
+  echo
+}
+
+usage() {
+  echo "usage: git wash <branch>"
+  echo
+  echo "Delete a git branch locally and remotely"
+}
+
+current_branch() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+delete_branch() {
+  echo "Deleting branch $1 locally and remotely"
+  if test "$1" = "master" ; then
+    echo "git-wash does not support deleting master"
+  else
+    git co master && git pull && git branch -d "$1" && git push origin --delete "$1"
+  fi
+}
+
+main() {
+  if [ "$#" -gt 1 ]; then
+    usage; exit 1
+  fi
+
+  if [ "$#" -eq 0 ]; then
+    CURRENT_BRANCH=$(git branch | grep "^\\*" | sed "s/\\* //")
+    delete_branch "$CURRENT_BRANCH"
+  else
+    delete_branch "$1"
+  fi
+}
+
+main "$@"
