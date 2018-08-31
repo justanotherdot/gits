@@ -21,7 +21,7 @@ delete_branch() {
   if test "$1" = "master" ; then
     echo "git-scrub does not support deleting master"
   else
-    git branch -D "$1" && git push origin --delete "$1"
+    git branch -d "$1" && git push origin --delete "$1"
   fi
 }
 
