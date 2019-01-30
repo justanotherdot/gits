@@ -1,0 +1,65 @@
+#!/usr/bin/env sh
+set -eu
+
+version() {
+  echo "git-p v0.1.0"
+  echo
+}
+
+usage() {
+  echo "usage: git p [REMOTE] [BRANCH]"
+  echo
+  echo "Shove things around, intelligently"
+}
+
+current_remote() {
+  git remote
+}
+
+current_branch() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+remote_tracking_branch() {
+  git rev-parse --abbrev-ref --symbolic-full-name "@{u}"
+}
+
+main() {
+  if [ "$#" -gt 2 ]; then
+    usage; exit 1
+  fi
+
+  remote=${1:-$(current_remote)}
+  branch=${2:-$(current_branch)}
+
+  # TODO Is there a brace expansion in bash that does this?
+  if remote_tracking_branch > /dev/null 2>&1; then
+
+    remote_branch=$(remote_tracking_branch)
+    common_ref=$(git merge-base "$branch" "$remote_branch")
+    branch_ref=$(git rev-parse "$branch")
+    remote_ref=$(git rev-parse "$remote_branch")
+
+    # n.b.
+    # You can check if you are ahead by whether common_ref matches remote_ref
+    # You can check if you are behind by whether common_ref matches branch_ref
+    # You can tell you are both if they both differ
+
+    if [ "$common_ref" = "$branch_ref" ] || {
+      [ "$common_ref" != "$branch_ref" ] && [ "$common_ref" != "$remote_ref" ];
+    }; then
+      # We are behind, and possibly ahead, and need to force push.
+      # n.b. `--force-with-lease` will stop if changes exist on the tracking branch.
+      git fetch --prune
+      git push --force-with-lease "$remote" "$branch"
+    else
+      # Push sans setting up remote tracking branch.
+      git push "$remote" "$branch"
+    fi
+  else
+    # We are solely ahead of the remote tracking branch, so simply push.
+    git push -u "$remote" "$branch"
+  fi
+}
+
+main "$@"
