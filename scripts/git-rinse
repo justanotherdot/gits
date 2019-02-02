@@ -26,9 +26,9 @@ delete_branch() {
 }
 
 main() {
-  readonly branches=$(git branch | grep -v master)
+  branches=$(git branch | grep -v master)
 
-  git co master && git pull
+  git co master
   for b in $branches; do
     delete_branch "$b"
   done
