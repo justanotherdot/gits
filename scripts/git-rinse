@@ -2,14 +2,14 @@
 set -eu
 
 version() {
-  echo "git-rinse v0.1.0"
+  echo "git-rinse v0.2.0"
   echo
 }
 
 usage() {
   echo "usage: git rinse <branch>"
   echo
-  echo "Delete a git branch locally and remotely"
+  echo "Delete a git branch locally"
 }
 
 current_branch() {
@@ -28,7 +28,6 @@ delete_branch() {
 main() {
   branches=$(git branch | grep -v master)
 
-  git co master
   for b in $branches; do
     delete_branch "$b"
   done
