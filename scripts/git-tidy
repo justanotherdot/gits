@@ -1,0 +1,6 @@
+#!/bin/sh -eu
+
+BRANCHES=$(git b | rg ': gone' | awk '{print $1}')
+if [ -n "$BRANCHES" ]; then
+  echo "$BRANCHES" | xargs git b -D
+fi
